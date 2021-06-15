@@ -1,6 +1,6 @@
 import React from 'react';
 import type {Node} from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {View, Text, StyleSheet, FlatList, Dimensions, ScrollView} from 'react-native';
 import Slider from './components/Slider.js';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,13 +16,30 @@ const images = [
 ]
 
 const dataList = [{key:'1'},{key:'2'},{key:'3'},{key:'4'},{key:'5'}]
+const numColumns = 6
+const WIDTH = Dimensions.get('window').width
 
 export default class App extends React.Component {
 
+  formatData = (dataList, numColumns) => {
+    const totalRows = Math.floor(dataList.length / numColumns)
+    let totalLastRow = dataList.length - (totalRows * numColumns)
+
+    while (totalRows !== 0 && totalLastRow !== numColumns) {
+      dataList.push({key: 'blank', empty: true})
+      totalLastRow++
+    }
+    return dataList
+  }
+
   _renderItem = ({item, index}) => {
+    let {itemStyle, itemText, itemInvisible} = styles
+    if (item.empty) {
+      return <View style ={[itemStyle, itemInvisible]}/>
+    }
     return (
-      <View style={styles.item} >
-        <Text>{item.key}</Text>
+      <View style={itemStyle} >
+        <Text style = {itemText}>{item.key}</Text>
       </View>
     )
   }
@@ -30,18 +47,18 @@ export default class App extends React.Component {
   render() {
     return (
       <View style={style.container}>
-        <Text>Hello Slider</Text>
+        <Text>     D&R - Kültür, Sanat ve Eğlence Dünyası</Text>
         <Screen>
           <SearchBar/>
         </Screen>
         <Slider images={images}/>
         <FlatList
-          data={dataList}
+          data={this.formatData(dataList, numColumns)}
           renderItem={this._renderItem}
           keyExtractor={(item,index) => index.toString()}
+          numColumns={numColumns}
         ></FlatList>
       </View>
-
     )
   }
 }
@@ -51,12 +68,19 @@ const style = StyleSheet.create({
     marginTop: 20
   },
 })
-
-  const styles = StyleSheet.create({
-    item: {
-      backgroundColor: '#3232ff',
-     // alignItems: 'center',
-    //  justifyContent: 'flex-end',
-      height:20
-    }
+const styles = StyleSheet.create({
+  itemStyle: {
+    backgroundColor: '#3232ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin:1,
+    height: WIDTH /numColumns
+  },
+  itemText: {
+    color: '#fff',
+    fontSize: 30
+  },
+  ItemInvisible: {
+    backgroundColor: 'transparent'
+  }
 })
